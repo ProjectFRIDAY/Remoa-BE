@@ -1,5 +1,6 @@
 package Remoa.BE.Post.Service;
 
+import Remoa.BE.Member.Domain.Comment;
 import Remoa.BE.Member.Domain.Member;
 import Remoa.BE.Post.Domain.Category;
 import Remoa.BE.Post.Domain.Post;
@@ -9,13 +10,20 @@ import Remoa.BE.Post.Repository.UploadFileRepository;
 import Remoa.BE.Post.Repository.CategoryRepository;
 import Remoa.BE.Post.form.Request.UploadPostForm;
 import Remoa.BE.Post.form.Response.ResReferenceDto;
+import Remoa.BE.Post.form.Response.ResRegistCommentDto;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -46,6 +54,11 @@ public class PostService {
                 .build();
     }
 
+    public Post findOne(Long postId){
+        Optional<Post> post = postRepository.findOne(postId);
+        return post.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Post not found"));
+    }
+
     @Transactional
     public ResReferenceDto registPost(UploadPostForm uploadPostForm, List<MultipartFile> uploadFiles, Member member){
 
@@ -69,4 +82,20 @@ public class PostService {
         return resReferenceDto;
     }
 
+    @Transactional
+    public ResRegistCommentDto registComment(Member member, String comment, Long postId){
+        Comment commentObj = new Comment();
+        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        commentObj.setComment(comment);
+        commentObj.setCommentedTime(formatDate);
+
+        ResRegistCommentDto resRegistCommentDto = ResRegistCommentDto.builder()
+                .commentId(commentObj.getCommentId())
+                .comment(commentObj.getComment())
+                .commentedTime(commentObj.getCommentedTime())
+                    .build();
+
+        postRepository.saveComment(commentObj);
+        return resRegistCommentDto;
+    }
 }

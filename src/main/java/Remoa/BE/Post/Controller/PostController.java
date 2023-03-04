@@ -7,6 +7,7 @@ import Remoa.BE.Post.Service.FileService;
 import Remoa.BE.Post.Service.PostService;
 import Remoa.BE.Post.form.Request.UploadPostForm;
 import Remoa.BE.Post.form.Response.ResReferenceDto;
+import Remoa.BE.Post.form.Response.ResRegistCommentDto;
 import Remoa.BE.exception.CustomBody;
 import Remoa.BE.exception.CustomMessage;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static Remoa.BE.exception.CustomBody.errorResponse;
 import static Remoa.BE.exception.CustomBody.successResponse;
@@ -72,6 +74,18 @@ public class PostController {
             return successResponse(CustomMessage.OK,resReferenceDto);
         }
 
+        return errorResponse(CustomMessage.UNAUTHORIZED);
+    }
+
+    @PostMapping("/reference/{reference_id}/comment")
+    public ResponseEntity<Object> registComment(@RequestParam Map<String, String> comment, @PathVariable("reference_id") Long postId, HttpServletRequest request){
+        String myComment = comment.get("comment");
+        if(authorized(request)){
+            Long memberId = getMemberId();
+            Member myMember = memberService.findOne(memberId);
+            ResRegistCommentDto resRegistCommentDto = postService.registComment(myMember, myComment, postId);
+            return successResponse(CustomMessage.OK, resRegistCommentDto);
+        }
         return errorResponse(CustomMessage.UNAUTHORIZED);
     }
 

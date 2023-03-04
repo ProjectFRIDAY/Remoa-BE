@@ -1,5 +1,6 @@
 package Remoa.BE.Post.Repository;
 
+import Remoa.BE.Member.Domain.Comment;
 import Remoa.BE.Member.Domain.Member;
 import Remoa.BE.Post.Domain.Category;
 import Remoa.BE.Post.Domain.Post;
@@ -24,8 +25,12 @@ public class PostRepository {
         em.persist(post);
     }
 
-    public Post findByPostId(Long postId) {
+    public Post findByPostId(Long postId){
         return em.find(Post.class, postId);
+    }
+
+    public Optional<Post> findOne(Long postId) { // 위 findByPostId와 거의 같음 반환형을 Optional<Post>로 하기 위함
+        return Optional.ofNullable(em.find(Post.class, postId));
     }
 
     public Optional<Post> findByMemberId(Member member) {
@@ -63,6 +68,8 @@ public class PostRepository {
                 .getResultList();
     }
 
-
+    public void saveComment(Comment comment) {
+        em.persist(comment);
+    }
 
 }
