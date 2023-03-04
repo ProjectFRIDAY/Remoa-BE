@@ -8,6 +8,7 @@ import Remoa.BE.Post.Repository.PostRepository;
 import Remoa.BE.Post.Repository.UploadFileRepository;
 import Remoa.BE.Post.Repository.CategoryRepository;
 import Remoa.BE.Post.form.Request.UploadPostForm;
+import Remoa.BE.Post.form.Response.ResReferenceDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,11 +47,26 @@ public class PostService {
     }
 
     @Transactional
-    public void registPost(UploadPostForm uploadPostForm, List<MultipartFile> uploadFiles, Member member){
+    public ResReferenceDto registPost(UploadPostForm uploadPostForm, List<MultipartFile> uploadFiles, Member member){
 
         Post post = dtoToEntity(uploadPostForm, member);
         postRepository.savePost(post);
+
+        ResReferenceDto resReferenceDto = ResReferenceDto.builder()
+                .postId(post.getPostId())
+                .title(post.getTitle())
+                .contestName(post.getContestName())
+                .deadline(post.getDeadline())
+                .ContestAward(post.getContestAward())
+                .contestAwareType(post.getContestAwareType())
+                .likeCount(post.getLikeCount())
+                .postingTime(post.getPostingTime())
+                .views(post.getViews())
+                .deleted(post.getDeleted())
+                    .build();
+
         fileService.saveUploadFiles(post, uploadFiles);
+        return resReferenceDto;
     }
 
 }

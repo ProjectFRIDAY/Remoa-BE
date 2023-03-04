@@ -6,6 +6,7 @@ import Remoa.BE.Post.Domain.Post;
 import Remoa.BE.Post.Service.FileService;
 import Remoa.BE.Post.Service.PostService;
 import Remoa.BE.Post.form.Request.UploadPostForm;
+import Remoa.BE.Post.form.Response.ResReferenceDto;
 import Remoa.BE.exception.CustomBody;
 import Remoa.BE.exception.CustomMessage;
 import lombok.RequiredArgsConstructor;
@@ -67,8 +68,8 @@ public class PostController {
         if(authorized(request)){
             Long memberId = getMemberId();
             Member myMember = memberService.findOne(memberId);
-            postService.registPost(uploadPostForm,uploadFiles,myMember);
-            return successResponse(CustomMessage.OK,myMember);
+            ResReferenceDto resReferenceDto = postService.registPost(uploadPostForm,uploadFiles,myMember);
+            return successResponse(CustomMessage.OK,resReferenceDto);
         }
 
         return errorResponse(CustomMessage.UNAUTHORIZED);
