@@ -96,6 +96,8 @@ public class PostService {
                 .commentId(commentObj.getCommentId())
                 .comment(commentObj.getComment())
                 .commentedTime(commentObj.getCommentedTime())
+                .commentLikeCount(commentObj.getCommentLikeCount())
+                .deleted(commentObj.getDeleted())
                     .build();
 
         return resRegistCommentDto;

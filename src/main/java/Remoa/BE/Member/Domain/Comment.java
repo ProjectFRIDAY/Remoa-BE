@@ -17,7 +17,7 @@ import static javax.persistence.FetchType.LAZY;
 public class Comment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @Column(name = "comment_id")
     private Long commentId;
 
