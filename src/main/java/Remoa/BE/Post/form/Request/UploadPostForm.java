@@ -21,7 +21,7 @@ public class UploadPostForm {
 
     private String category; // Category name
 
-    private String contestAward;
+    private String contestAwardType;
 
     //private List<MultipartFile> uploadFiles;
 }

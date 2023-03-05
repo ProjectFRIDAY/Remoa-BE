@@ -1,6 +1,7 @@
 package Remoa.BE.Post.Service;
 
 import Remoa.BE.Member.Domain.Comment;
+import Remoa.BE.Member.Domain.Feedback;
 import Remoa.BE.Member.Domain.Member;
 import Remoa.BE.Post.Domain.Category;
 import Remoa.BE.Post.Domain.Post;
@@ -9,6 +10,7 @@ import Remoa.BE.Post.Repository.PostRepository;
 import Remoa.BE.Post.Repository.UploadFileRepository;
 import Remoa.BE.Post.Repository.CategoryRepository;
 import Remoa.BE.Post.form.Request.UploadPostForm;
+import Remoa.BE.Post.form.Response.ResFeedbackDto;
 import Remoa.BE.Post.form.Response.ResReferenceDto;
 import Remoa.BE.Post.form.Response.ResRegistCommentDto;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +52,7 @@ public class PostService {
                 .member(member)
                 .contestName(uploadPostForm.getContestName())
                 .category(category)
-                .contestAwareType(uploadPostForm.getContestAward())
+                .contestAwareType(uploadPostForm.getContestAwardType())
                 .build();
     }
 
@@ -97,5 +99,29 @@ public class PostService {
 
         postRepository.saveComment(commentObj);
         return resRegistCommentDto;
+    }
+
+    @Transactional
+    public ResFeedbackDto registFeedback(Member member,String feedback, Long postId, Integer pageNumber){
+
+        Feedback feedbackObj = new Feedback();
+
+        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        feedbackObj.setPost(postRepository.findByPostId(postId));
+        feedbackObj.setMember(member);
+        feedbackObj.setFeedback(feedback);
+        feedbackObj.setPageNumber(pageNumber);
+        feedbackObj.setFeedbackTime(formatDate);
+
+        ResFeedbackDto resFeedbackDto = ResFeedbackDto.builder()
+                .feedbackId(feedbackObj.getFeedbackId())
+                .pageNumber(feedbackObj.getPageNumber())
+                .feedback(feedbackObj.getFeedback())
+                .feedbackTime(formatDate)
+                    .build();
+
+        postRepository.saveFeedback(feedbackObj);
+        System.out.println(feedbackObj.getFeedback());
+        return resFeedbackDto;
     }
 }

@@ -6,6 +6,7 @@ import Remoa.BE.Post.Domain.Post;
 import Remoa.BE.Post.Service.FileService;
 import Remoa.BE.Post.Service.PostService;
 import Remoa.BE.Post.form.Request.UploadPostForm;
+import Remoa.BE.Post.form.Response.ResFeedbackDto;
 import Remoa.BE.Post.form.Response.ResReferenceDto;
 import Remoa.BE.Post.form.Response.ResRegistCommentDto;
 import Remoa.BE.exception.CustomBody;
@@ -89,4 +90,15 @@ public class PostController {
         return errorResponse(CustomMessage.UNAUTHORIZED);
     }
 
+    @PostMapping("/reference/{reference_id}/{page_number}") // 레퍼런스에 피드백 등록
+    public ResponseEntity<Object> registFeedback(@RequestParam Map<String, String> feedback, @PathVariable("reference_id") Long postId, @PathVariable("page_number") Integer pageNumber, HttpServletRequest request){
+        String myFeedback = feedback.get("feedback");
+        if(authorized(request)){
+            Long memberId = getMemberId();
+            Member myMember = memberService.findOne(memberId);
+            ResFeedbackDto resFeedbackDto = postService.registFeedback(myMember, myFeedback, postId, pageNumber);
+            return successResponse(CustomMessage.OK, resFeedbackDto);
+        }
+        return errorResponse(CustomMessage.UNAUTHORIZED);
+    }
 }
