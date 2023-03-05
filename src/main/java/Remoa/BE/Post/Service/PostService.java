@@ -90,14 +90,14 @@ public class PostService {
         String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         commentObj.setComment(comment);
         commentObj.setCommentedTime(formatDate);
-
+        postRepository.saveComment(commentObj);
+        System.out.println("commentId: " + commentObj.getCommentId());
         ResRegistCommentDto resRegistCommentDto = ResRegistCommentDto.builder()
                 .commentId(commentObj.getCommentId())
                 .comment(commentObj.getComment())
                 .commentedTime(commentObj.getCommentedTime())
                     .build();
 
-        postRepository.saveComment(commentObj);
         return resRegistCommentDto;
     }
 
@@ -113,6 +113,7 @@ public class PostService {
         feedbackObj.setPageNumber(pageNumber);
         feedbackObj.setFeedbackTime(formatDate);
 
+        postRepository.saveFeedback(feedbackObj);
         ResFeedbackDto resFeedbackDto = ResFeedbackDto.builder()
                 .feedbackId(feedbackObj.getFeedbackId())
                 .pageNumber(feedbackObj.getPageNumber())
@@ -120,7 +121,6 @@ public class PostService {
                 .feedbackTime(formatDate)
                     .build();
 
-        postRepository.saveFeedback(feedbackObj);
         System.out.println(feedbackObj.getFeedback());
         return resFeedbackDto;
     }
