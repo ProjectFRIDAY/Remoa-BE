@@ -79,7 +79,7 @@ public class PostController {
     }
 
     @PostMapping("/reference/{reference_id}/comment")
-    public ResponseEntity<Object> registComment(@RequestParam Map<String, String> comment, @PathVariable("reference_id") Long postId, HttpServletRequest request){
+    public ResponseEntity<Object> registComment(@RequestBody Map<String, String> comment, @PathVariable("reference_id") Long postId, HttpServletRequest request){
         String myComment = comment.get("comment");
         if(authorized(request)){
             Long memberId = getMemberId();
@@ -91,8 +91,9 @@ public class PostController {
     }
 
     @PostMapping("/reference/{reference_id}/{page_number}") // 레퍼런스에 피드백 등록
-    public ResponseEntity<Object> registFeedback(@RequestParam Map<String, String> feedback, @PathVariable("reference_id") Long postId, @PathVariable("page_number") Integer pageNumber, HttpServletRequest request){
+    public ResponseEntity<Object> registFeedback(@RequestBody Map<String, String> feedback, @PathVariable("reference_id") Long postId, @PathVariable("page_number") Integer pageNumber, HttpServletRequest request){
         String myFeedback = feedback.get("feedback");
+        System.out.println("myFeedback: " + myFeedback);
         if(authorized(request)){
             Long memberId = getMemberId();
             Member myMember = memberService.findOne(memberId);
