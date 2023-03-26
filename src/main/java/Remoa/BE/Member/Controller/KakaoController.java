@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -98,6 +99,13 @@ public class KakaoController {
         member.setEmail(form.getEmail());
         member.setTermConsent(form.getTermConsent());
 
+        Long kakaoId = form.getKakaoId();
+        if(Objects.equals(kakaoId,2649301685L)){
+            member.setRole("ROLE_ADMIN");
+        }
+        else{
+            member.setRole("ROLE_USER");
+        }
         memberService.join(member);
         securityLoginWithoutLoginForm(member, request);
 

@@ -26,6 +26,7 @@ public class NoticeController {
 
     private final NoticeService noticeService;
 
+
     @PostMapping("/notice")
     public ResponseEntity<Object> postNotice(@Validated @RequestBody ReqNoticeDto reqNoticeDto){
         noticeService.registerNotice(reqNoticeDto);

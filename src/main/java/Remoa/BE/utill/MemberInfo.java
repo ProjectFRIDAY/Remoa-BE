@@ -39,7 +39,7 @@ public class MemberInfo {
 
         //로그인 세션에 들어갈 권한을 설정합니다.
         List<GrantedAuthority> list = new ArrayList<>();
-        list.add(new SimpleGrantedAuthority("ROLE_USER"));
+        list.add(new SimpleGrantedAuthority(member.getRole()));
 
         SecurityContext sc = SecurityContextHolder.getContext();
 

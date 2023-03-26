@@ -3,6 +3,7 @@ package Remoa.BE.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -37,16 +38,9 @@ public class SecureConfig {
         http
                 .authorizeRequests()
                 //api 명세 확정 후 재확인 핋요
+
+                .antMatchers(HttpMethod.POST,"/notice").hasAnyRole( "ADMIN")
                 .antMatchers("/**").permitAll()
-                /*.antMatchers("/").permitAll()
-                .antMatchers("/login").permitAll()
-                .antMatchers("/logout").permitAll()
-                .antMatchers("/upload").permitAll()
-                .antMatchers("/download").permitAll()
-                .antMatchers("/signup/**").permitAll()
-                .antMatchers("/mypage").authenticated()*/
-                .antMatchers("/admin").hasRole("ADMIN")
-                .antMatchers("/user").hasAnyRole("ADMIN", "USER")
                 .anyRequest().authenticated()
                 .and()
 
