@@ -9,12 +9,13 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * JPA Query Creation을 사용해서 post data sorting & slicing
  */
 @Repository
-public interface PostPagingRepository extends PagingAndSortingRepository<Post, Long> {
+public interface PostPagingRepository extends PagingAndSortingRepository<Post, Long>, PostCustomRepository {
 
     Page<Post> findByMemberAndTitleContainingOrderByPostingTimeDesc(Pageable pageable, Member member,String title);
 
@@ -35,5 +36,7 @@ public interface PostPagingRepository extends PagingAndSortingRepository<Post, L
     Page<Post> findByTitleContaining(Pageable pageable,String title);
 
     Page<Post> findByCategoryAndTitleContaining(Pageable pageable, Category category,String title);
+
+    List<Post> findByMemberRecentTwelve(Member member);
 
 }

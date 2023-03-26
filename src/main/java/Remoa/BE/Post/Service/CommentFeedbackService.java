@@ -39,4 +39,8 @@ public class CommentFeedbackService {
         return commentFeedbackRepository.findByMemberOrderByTimeDesc(pageable, member);
     }
 
+    public CommentFeedback findNewestCommentFeedback(Member member) {
+        return commentFeedbackRepository.findByMemberOrderByTime(member);
+    }
+
 }

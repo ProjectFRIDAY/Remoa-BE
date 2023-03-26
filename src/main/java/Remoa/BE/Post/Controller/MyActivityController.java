@@ -5,6 +5,7 @@ import Remoa.BE.Member.Domain.Member;
 import Remoa.BE.Member.Dto.Res.ResMemberInfoDto;
 import Remoa.BE.Member.Service.MemberService;
 import Remoa.BE.Post.Domain.PostScarp;
+import Remoa.BE.Post.Dto.Response.ResCommentDto;
 import Remoa.BE.Post.Dto.Response.ResCommentFeedbackDto;
 import Remoa.BE.Post.Dto.Response.ResPostDto;
 import Remoa.BE.Post.Service.CommentFeedbackService;
@@ -44,17 +45,13 @@ public class MyActivityController {
     /**
      * 내 활동 관리
      * @param request
-     * @param commentSize
-     * @param scrapSize
      * @return Map<String, Object>
      *     "contents" : 내가 작성한 최신 댓글(Comment, Feedback 무관)들의 List.
      *     "posts" : 내가 스크랩한 post들을 가장 최근 스크랩한 순서의 List.
      * 주의사항! : page는 고정해두고 size를 이용하므로 누적 데이터가 return 됨.
      */
     @GetMapping("/user/activity")
-    public ResponseEntity<Object> myActivity(HttpServletRequest request,
-                                             @RequestParam(name = "comment", defaultValue = "1", required = false) int commentSize,
-                                             @RequestParam(name = "scrap", defaultValue = "1", required = false) int scrapSize) {
+    public ResponseEntity<Object> myActivity(HttpServletRequest request) {
 
         if (authorized(request)) {
             Long memberId = getMemberId();
@@ -62,49 +59,39 @@ public class MyActivityController {
 
             Map<String, Object> result = new HashMap<>();
 
-            Page<CommentFeedback> commentOrFeedback = commentFeedbackService.findNewestCommentOrFeedback(myMember, commentSize);
+            CommentFeedback commentFeedback = commentFeedbackService.findNewestCommentFeedback(myMember);
 
-            /**
-             * 조회한 가장 최근에 작성한 댓글들을 dto로 mapping
-             */
-            List<ResCommentFeedbackDto> contents = commentOrFeedback.stream().map(commentFeedback -> {
-                ResCommentFeedbackDto map = null;
-                if (commentFeedback.getType().equals(FEEDBACK)) {
-                    map = ResCommentFeedbackDto.builder()
-                            .title(commentFeedback.getPost().getTitle())
-                            .postId(commentFeedback.getPost().getPostId())
-                            .thumbnail(commentFeedback.getPost().getThumbnail().getStoreFileUrl())
-                            .member(new ResMemberInfoDto(commentFeedback.getMember().getMemberId(),
-                                    commentFeedback.getMember().getNickname(),
-                                    commentFeedback.getMember().getProfileImage()))
-                            .content(commentFeedback.getFeedback().getFeedback())
-                            .likeCount(commentFeedback.getFeedback().getFeedbackLikeCount()).build();
-                } else if (commentFeedback.getType().equals(COMMENT)) {
-                    map = ResCommentFeedbackDto.builder()
-                            .title(commentFeedback.getPost().getTitle())
-                            .postId(commentFeedback.getPost().getPostId())
-                            .thumbnail(commentFeedback.getPost().getThumbnail().getStoreFileUrl())
-                            .member(new ResMemberInfoDto(commentFeedback.getMember().getMemberId(),
-                                    commentFeedback.getMember().getNickname(),
-                                    commentFeedback.getMember().getProfileImage()))
-                            .content(commentFeedback.getComment().getComment())
-                            .likeCount(commentFeedback.getComment().getCommentLikeCount()).build();
-                }
-                return map;
-            }).collect(Collectors.toList());
+            ResCommentFeedbackDto commentOrFeedback = null;
+            if (commentFeedback.getType().equals(FEEDBACK)) {
+                commentOrFeedback = ResCommentFeedbackDto.builder()
+                        .title(commentFeedback.getPost().getTitle())
+                        .postId(commentFeedback.getPost().getPostId())
+                        .thumbnail(commentFeedback.getPost().getThumbnail().getStoreFileUrl())
+                        .member(new ResMemberInfoDto(commentFeedback.getMember().getMemberId(),
+                                commentFeedback.getMember().getNickname(),
+                                commentFeedback.getMember().getProfileImage()))
+                        .content(commentFeedback.getFeedback().getFeedback())
+                        .likeCount(commentFeedback.getFeedback().getFeedbackLikeCount())
+                        .build();
+            } else if (commentFeedback.getType().equals(COMMENT)) {
+                commentOrFeedback = ResCommentFeedbackDto.builder()
+                        .title(commentFeedback.getPost().getTitle())
+                        .postId(commentFeedback.getPost().getPostId())
+                        .thumbnail(commentFeedback.getPost().getThumbnail().getStoreFileUrl())
+                        .member(new ResMemberInfoDto(commentFeedback.getMember().getMemberId(),
+                                commentFeedback.getMember().getNickname(),
+                                commentFeedback.getMember().getProfileImage()))
+                        .content(commentFeedback.getComment().getComment())
+                        .likeCount(commentFeedback.getComment().getCommentLikeCount())
+                        .build();
+            }
+            result.put("content", commentOrFeedback);
 
-            result.put("contents", contents);
-
-            scrapSize *= 12; //스크랩한 post는 12개씩 보여주므로.
 
             /**
              * 조회한 최근에 스크랩한 12개의 post들을 dto로 mapping.
              */
-            List<ResPostDto> posts = postService.findScrapedPost(scrapSize, myMember)
-                    .stream()
-                    .map(PostScarp::getPost)
-                    .collect(Collectors.toList())
-                    .stream()
+            List<ResPostDto> posts = postService.findRecentTwelveScrapedPost(myMember).stream()
                     .map(post -> ResPostDto.builder()
                             .postId(post.getPostId())
                             .postMember(new ResMemberInfoDto(post.getMember().getMemberId(),
@@ -116,8 +103,8 @@ public class MyActivityController {
                             .postingTime(post.getPostingTime().toString())
                             .views(post.getViews())
                             .scrapCount(post.getScrapCount())
-                            .categoryName(post.getCategory().getName()).build())
-                    .collect(Collectors.toList());
+                            .categoryName(post.getCategory().getName())
+                            .build()).collect(Collectors.toList());
 
             result.put("posts", posts);
 
