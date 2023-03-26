@@ -4,12 +4,10 @@ import Remoa.BE.Member.Domain.Member;
 import Remoa.BE.Member.Service.MemberService;
 import Remoa.BE.Post.Domain.Category;
 import Remoa.BE.Post.Domain.Post;
+import Remoa.BE.Post.Domain.PostLike;
 import Remoa.BE.Post.Domain.PostScarp;
 import Remoa.BE.Post.Dto.Request.UploadPostForm;
-import Remoa.BE.Post.Repository.CategoryRepository;
-import Remoa.BE.Post.Repository.PostPagingRepository;
-import Remoa.BE.Post.Repository.PostRepository;
-import Remoa.BE.Post.Repository.PostScrapRepository;
+import Remoa.BE.Post.Repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -27,7 +25,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static Remoa.BE.utill.FileExtension.fileExtension;
 
@@ -36,6 +33,7 @@ import static Remoa.BE.utill.FileExtension.fileExtension;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
+    private final PostLikeRepository postLikeRepository;
 
 
     private final MemberService memberService;
@@ -157,6 +155,10 @@ public class PostService {
         return postScrapRepository.findByMemberMemberIdAndPostPostId(memberId, postId);
     }
 
+    public PostLike getPostLikeByMemberIdAndPostId(Long memberId, Long postId) {
+        return postLikeRepository.findByMemberMemberIdAndPostPostId(memberId, postId);
+    }
+
     @Transactional
     public void scrapPost(Long memberId, Member myMember, Long referenceId) {
         Post post = findOne(referenceId);
@@ -172,6 +174,22 @@ public class PostService {
         } else {
             post.setScrapCount(post.getScrapCount() - 1); // 스크랩 수 1 차감
             postScrapRepository.deleteById(postScarp.getPostScrapId()); // db에서 삭제
+        }
+    }
+
+    @Transactional
+    public void likePost(Long memberId, Member myMember, Long referenceId) {
+        Post post = findOne(referenceId);
+        Integer postLikeCount = post.getLikeCount(); // 이 게시물을 좋아요한 수
+
+        PostLike postLike = getPostLikeByMemberIdAndPostId(memberId, referenceId);
+        if (postLike == null) {
+            post.setLikeCount(postLikeCount + 1); // 좋아요 + 1
+            PostLike postLikeObj = PostLike.createPostLike(myMember, post);
+            postLikeRepository.save(postLikeObj);
+        } else {
+            post.setLikeCount(post.getLikeCount() - 1); // 좋아요 + 1
+            postLikeRepository.deleteById(postLike.getPostLikeId());
         }
     }
 
