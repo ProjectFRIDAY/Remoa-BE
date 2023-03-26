@@ -74,7 +74,7 @@ public class PostService {
 
         //확장자 확인
         String extension = fileExtension(uploadFiles.get(0));
-        if (extension.equals("pdf") || extension.equals("jpg") || extension.equals("png")) {
+        if (extension.equals("pdf") || extension.equals("jpg") || extension.equals("png") || extension.equals("jpeg")) {
             int pageCount;
             if (extension.equals("pdf")) {
                 PDDocument document = PDDocument.load(uploadFiles.get(0).getInputStream());

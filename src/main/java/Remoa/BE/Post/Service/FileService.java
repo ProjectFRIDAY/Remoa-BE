@@ -4,6 +4,7 @@ import Remoa.BE.Post.Domain.Post;
 import Remoa.BE.Post.Domain.UploadFile;
 import Remoa.BE.Post.Repository.PostRepository;
 import Remoa.BE.Post.Repository.UploadFileRepository;
+import Remoa.BE.utill.FileExtension;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static Remoa.BE.utill.FileExtension.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,11 +51,17 @@ public class FileService {
      * 파일들을 저장해준다
      */
     @Transactional
-    public void saveUploadFiles(Post post,MultipartFile thumbnail, List<MultipartFile> multipartFile){
+    public void saveUploadFiles(Post post,MultipartFile thumbnail, List<MultipartFile> multipartFile) throws IOException {
 
+        String extension = fileExtension(thumbnail);
         //썸네일 파일 저장 추가
-        saveUploadFile(thumbnail,post,"thumbnail");
-        multipartFile.forEach(file -> saveUploadFile(file, post,"post"));
+        if(extension.equals("jpg") || extension.equals("png") || extension.equals("jpeg")) {
+            saveUploadFile(thumbnail, post, "thumbnail");
+            multipartFile.forEach(file -> saveUploadFile(file, post, "post"));
+        }
+        else{
+            throw new IOException();
+        }
 
 
         //새로운 인스턴스 만들어서 set하지 않으면 clear 되면서 null이 계속 저장됨.
